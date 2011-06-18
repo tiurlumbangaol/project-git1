@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process-definition xmlns="urn:jbpm.org:jpdl-3.1" name="lawwf:lawofficeworkflow">
+
+    <swimlane name="initiator"/>
+
+    <!--              -->
+    <!-- Start Review -->
+    <!--              -->
+
+    <start-state name="start">
+        <task name="lawwf:submitbyuser" swimlane="initiator"/>
+        <transition name="" to="initialise"/>
+    </start-state>
+
+    <decision name="initialise">
+        <event type="node-enter">
+            <script>
+               <variable name="lawwf_reviewerCnt" access="write"/>
+               <variable name="lawwf_approveCnt" access="write"/>
+               <variable name="lawwf_reviewCycle" access="write"/>
+               <expression>
+                 lawwf_reviewCycle = 1;
+                 lawwf_reviewerCnt = bpm_assignees.size();
+                 lawwf_approveCnt = 0;
+               </expression>
+            </script>
+        </event>
+        <transition name="" to="submitserialreview">
+ 		</transition>
+    </decision>
+
+    <!--               -->
+    <!-- Serial Review -->
+    <!--               -->
+
+    <decision name="submitserialreview">
+       <transition name="endreview" to="endreview" />
+       <transition name="review" to="serialreview">
+         <condition>#{lawwf_approveCnt &lt; lawwf_reviewerCnt}</condition>
+			<action class="org.alfresco.repo.workflow.jbpm.AlfrescoJavaScript">
+				<script>
+				    var from = "admin@alfresco.com";
+					var to = "";
+					var mail = actions.create("mail");
+                    if(bpm_assignees.get(lawwf_approveCnt).type == "{http://www.alfresco.org/model/content/1.0}person")
+					{
+					  to = bpm_assignees.get(lawwf_approveCnt).properties.email;
+					} 
+					 else 
+					{
+					  to = search.findNode(bpm_assignees.get(lawwf_approveCnt)).properties['cm:email'];
+					}
+					mail.parameters.to = initiator.properties.email;
+					mail.parameters.subject = "Task " + bpm_workflowDescription +" sent for approval";
+					mail.parameters.from = from;
+					mail.parameters.text = "Task sent for approval.";
+					mail.execute(bpm_package);
+				</script>
+          </action>  
+       </transition>
+    </decision>
+
+    <task-node name="serialreview">
+        <task name="lawwf:reviewTask">
+           <assignment class="org.alfresco.repo.workflow.jbpm.AlfrescoAssignment">
+              <actor>#{bpm_assignees.get(lawwf_approveCnt)}</actor>
+           </assignment>
+           <event type="task-assign">
+              <script>
+                 if (lawwf_reviewCycle > 1)
+                    taskInstance.description = taskInstance.description + " (" + lawwf_reviewCycle + ")";
+              </script>
+           </event>
+        </task>
+
+        <transition name="approve" to="submitserialreview">
+           <script>
+              <variable name="lawwf_approveCnt" access="read, write"/>
+              <expression>
+                 lawwf_approveCnt = lawwf_approveCnt + 1;
+              </expression>
+           </script>
+       </transition>
+        <transition name="reject" to="endreview" />
+    </task-node>
+
+
+    <!--                -->
+    <!-- End the Review -->
+    <!--                -->
+
+    <decision name="endreview">
+       <transition name="rejected" to="rejected" >
+		 <action class="org.alfresco.repo.workflow.jbpm.AlfrescoJavaScript">
+                   <script>
+				            var from = "admin@alfresco.com";
+                            var mail = actions.create("mail");
+							mail.parameters.to = initiator.properties.email;
+							mail.parameters.subject = "Your " + bpm_workflowDescription + "status";
+			                mail.parameters.from = from;
+						    mail.parameters.text = "Your task is rejected";
+			                mail.execute(bpm_package);
+                   </script>
+            </action>  
+       
+                  
+          </transition>              
+       <transition name="approved" to="approved">
+           <condition>#{lawwf_approveCnt == lawwf_reviewerCnt}</condition>
+            <action class="org.alfresco.repo.workflow.jbpm.AlfrescoJavaScript">
+                   <script>
+                           var from = "admin@alfresco.com";
+						   var mail = actions.create("mail");
+						   mail.parameters.to = initiator.properties.email;
+						   mail.parameters.subject = "Your Task " + bpm_workflowDescription  + "status";
+			               mail.parameters.from = from;
+						   mail.parameters.text = "Your task is approved.";
+			               mail.execute(bpm_package);
+                   </script>
+            </action>  
+       </transition>
+    </decision>
+
+    <task-node name="rejected">
+        <task name="lawwf:rejectedTask" swimlane="initiator" />
+		<transition name="" to="end" />
+    </task-node>
+
+    <task-node name="approved">
+        <task name="lawwf:approvedTask" swimlane="initiator" />
+        <transition name="" to="end" />
+    </task-node>
+
+
+    <!--                 -->
+    <!-- End the Process -->
+    <!--                 -->
+
+    <end-state name="end"/>
+
+</process-definition>

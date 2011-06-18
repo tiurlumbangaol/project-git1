@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model name="lawwf:workflowmodel" xmlns="http://www.alfresco.org/model/dictionary/1.0">
+
+   <description>Law Office Workflow Model</description>
+   <version>1.0</version>
+
+   <!-- Imports are required to allow references to definitions in other models -->   
+   <imports>
+   	  <!-- Import Alfresco Dictionary Definitions -->
+      <import uri="http://www.alfresco.org/model/dictionary/1.0" prefix="d"/>
+      <!-- Import Alfresco Content Domain Model Definitions -->
+      <import uri="http://www.alfresco.org/model/content/1.0" prefix="cm"/>
+      <import uri="http://www.alfresco.org/model/bpm/1.0" prefix="bpm"/>
+	   <import uri="http://www.alfresco.org/model/system/1.0" prefix="sys" />
+	   <import uri="http://www.alfresco.org/model/workflow/1.0" prefix="wf" />
+   </imports>
+
+   <!-- Introduction of new namespaces defined by this model -->
+  
+
+   <namespaces>
+      <namespace uri="http://www.alfresco.org/lawoffice/workflow/1.0" prefix="lawwf"/>
+   </namespaces>
+
+   <constraints>
+    <constraint name="lawwf:availableDepartmentType" type="LIST">
+            <parameter name="allowedValues">
+                <!--  TODO: Determine if status values can be mapped to human-readable strings -->
+                <list>
+                    <value>Marketing</value>
+                    <value>Finance</value>
+                    <value>Project</value>
+                </list>
+            </parameter>
+        </constraint>
+       
+    </constraints>
+
+   <types>
+      <type name="lawwf:submitbyuser" >
+         <parent>bpm:startTask</parent>
+         <mandatory-aspects>
+            <aspect>bpm:assignees</aspect>
+            <aspect>lawwf:commonInitiatorDetails</aspect>
+         </mandatory-aspects>
+      </type>	
+      
+    <type name="lawwf:reviewTask">
+       <parent>bpm:workflowTask</parent>
+         <mandatory-aspects>
+            <aspect>bpm:assignees</aspect>
+         </mandatory-aspects>
+     </type>
+	  
+	  <type name="lawwf:approvedTask">
+     	 <parent>lawwf:reviewTask</parent>
+      </type>
+
+     <type name="lawwf:rejectedTask">
+     	 <parent>lawwf:reviewTask</parent>
+     </type>
+  </types>
+  
+  
+  
+   <aspects>
+
+      <aspect name="lawwf:commonInitiatorDetails">
+		<properties>
+            <property name="lawwf:department_name">
+              <title>Department</title>
+               <type>d:text</type>
+                <constraints>
+                        <constraint ref="lawwf:availableDepartmentType" />
+                </constraints>
+           	</property>
+                       
+			 <property name="lawwf:published_date">
+             <title>Published Date</title>
+               <type>d:date</type>
+               <mandatory enforced="true">true</mandatory>
+            </property>
+        			 
+             </properties>
+
+      </aspect>
+   
+   </aspects>  
+   
+</model>

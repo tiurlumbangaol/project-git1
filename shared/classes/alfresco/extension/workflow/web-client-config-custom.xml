@@ -1,0 +1,71 @@
+<alfresco-config>
+
+ <config>
+  <client>
+         <!-- the from address to use when sending emails from the client -->
+         <from-email-address>admin@alfresco.com</from-email-address>
+  </client>
+ </config>
+
+    <!-- *********************************************************************************************************************************************** -->
+    <!-- ************************************************ Law workFlow related configuration starts here **********************************************  -->
+    <!-- *********************************************************************************************************************************************** -->
+
+	 <!-- ********************  Following properties will be seen while initiator start workflow task. (Start Here) ****************************         -->
+	 <config evaluator="node-type" condition="lawwf:submitbyuser" replace="true">
+		<property-sheet>
+			<separator name="sep1" display-label-id="general" component-generator="HeaderSeparatorGenerator" />
+			<show-property name="bpm:workflowDescription" component-generator="TextAreaGenerator"/>
+			<show-property name="lawwf:published_date" />
+	        <show-property name="bpm:workflowDueDate" display-label-id="due_date" />
+			<show-property name="lawwf:department_name" />
+			<separator name="sep2" display-label="Approvers Details" component-generator="HeaderSeparatorGenerator" />
+			<show-association name="bpm:assignees" display-label="Approvers" />
+		</property-sheet>
+	</config>
+	<!-- *****************************  Following properties will be seen while initiator start workflow task. (End Here) ****************************  -->
+
+	<!-- *************************  Following properties will be seen while reviewer review workflow task. (Start Here) ******************************  -->
+	<config evaluator="node-type" condition="lawwf:reviewTask" replace="true">
+		<property-sheet>
+			<separator name="sep1" display-label="Law Business Process Details" component-generator="HeaderSeparatorGenerator" />
+			<show-property name="bpm:description" read-only="true"  component-generator="TextAreaGenerator"/>
+			<separator name="sep2" display-label="Your Comments" component-generator="HeaderSeparatorGenerator" />
+			<show-property name="bpm:comment" read-only="false"  component-generator="TextAreaGenerator"/>
+			<separator name="sep3" display-label="Approvers Details" component-generator="HeaderSeparatorGenerator" />
+			<show-association name="bpm:assignees" display-label="Approvers" read-only="true" />
+		</property-sheet>
+	</config>
+	<!-- **************************  Following properties will be seen while reviewer review workflow task. (End Here) ******************************  -->
+
+	<!-- ******************  Following properties will be seen while task is approved after all reviewer review workflow task. (Start Here) **********  -->
+	<config evaluator="node-type" condition="lawwf:approvedTask" replace="true">
+		<property-sheet>
+			<separator name="sep1" display-label="Law Business Process Details" component-generator="HeaderSeparatorGenerator" />
+			<show-property name="bpm:description" read-only="true"  component-generator="TextAreaGenerator"/>
+			<separator name="sep2" display-label="Your Comments" component-generator="HeaderSeparatorGenerator" />
+			<show-property name="bpm:comment" read-only="false"  component-generator="TextAreaGenerator"/>
+			<separator name="sep3" display-label="Approvers Details" component-generator="HeaderSeparatorGenerator" />
+			<show-association name="bpm:assignees" display-label="Approvers" read-only="true" />
+		</property-sheet>
+	</config>
+	<!-- ***************  Following properties will be seen while task is approved after all reviewer review workflow task. (End Here) **************  -->
+
+	<!-- ******************************  Following properties will be seen while any reviewer reject workflow task. (Start Here) *******************  -->
+	<config evaluator="node-type" condition="lawwf:rejectedTask" replace="true">
+		<property-sheet>
+			<separator name="sep1" display-label="Law Business Process Details" component-generator="HeaderSeparatorGenerator" />
+			<show-property name="bpm:description" read-only="true"  component-generator="TextAreaGenerator"/>
+			<separator name="sep2" display-label="Your Comments" component-generator="HeaderSeparatorGenerator" />
+			<show-property name="bpm:comment" read-only="false"  component-generator="TextAreaGenerator"/>
+			<separator name="sep3" display-label="Approvers Details" component-generator="HeaderSeparatorGenerator" />
+			<show-association name="bpm:assignees" display-label="Approvers" read-only="true" />		
+		</property-sheet>
+	</config>
+	<!-- *****************************  Following properties will be seen while any reviewer reject workflow task. (End Here) *******************  -->
+
+   <!-- *********************************************************************************************************************************************** -->
+   <!-- ************************************************ Law workFlow related configuration ends here ************************************************  -->
+   <!-- *********************************************************************************************************************************************** -->
+
+	</alfresco-config>
